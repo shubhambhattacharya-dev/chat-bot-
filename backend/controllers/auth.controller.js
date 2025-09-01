@@ -2,6 +2,8 @@ import User from '../models/user.model.js';
 import { generateTokenandSetCookie} from '../lib/utils/generateToken.js';
 import bcrypt from 'bcryptjs';
 
+//signup controller
+
 export const signup=async(req,res)=>{
    try {
     const {fullName,username,email,password}=req.body;
@@ -20,6 +22,11 @@ export const signup=async(req,res)=>{
     if(existingEmail){
         return res.status(400).json({error:"Email already exists"});
     }
+
+   if(password.length<6){
+  return res.status(400).json({error:"password must be at least 6 characters long"});
+}
+
   //hashpassword
     const salt=await bcrypt.genSalt(10);
     const hashedPassword=await bcrypt.hash(password,salt);
@@ -58,14 +65,44 @@ export const signup=async(req,res)=>{
    }
 }
 
+//login controller
+
 export const login=async(req,res)=>{
-    res.json({
-        data:"you hit the login endpoint of login",
+   try {
+    const {username,password}=req.body;
+    const user=await User.findOne({username});
+    const ispasswordCorrect=await bcrypt.compare(password,user?.password ||"");
+    if(!user || !ispasswordCorrect){
+  return res.status(400).json({error:"Invalid username or password"});
+}
+
+
+    generateTokenandSetCookie(user._id,res);
+    res.status(200).json({
+        _id:user._id,
+        fullName:user.fullName,
+        username:user.username,
+        email:user.email,
+        followers:user.followers,
+        following:user.following,
+        profileImg:user.profileImg,
+        coverImg:user.coverImg,
+
     })
+
+
+    
+   } catch (error) {
+    console.log("Error in login controller:", error.message);
+    res.status(500).json({error:"Internal Server error"});
+    
+   }
 }
 
 export const logout=async(req,res)=>{
-    res.json({
-        data:"you hit the logout endpoint of logout",
-    })
+   try {
+    
+   } catch (error) {
+    
+   }
 }
