@@ -7,6 +7,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import authRoutes from './routes/auth.route.js';
 import userRoutes from './routes/user.route.js';
 import postRoutes from './routes/post.route.js'; 
+import notificationRoutes from './routes/notification.route.js';
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ const port = process.env.PORT || 5000;
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/notification',notificationRoutes);
 
 (async () => {
     try {
