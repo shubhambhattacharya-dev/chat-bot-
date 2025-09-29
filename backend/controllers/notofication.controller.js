@@ -9,6 +9,10 @@ export const getNotifications = async (req, res) => {
       .populate({
         path: "from",
         select: "username profileImg"
+      })
+      .populate({
+        path: "post",
+        select: "text img"
       });
 
     await Notification.updateMany(
@@ -31,5 +35,28 @@ export const deleteNotifications = async (req, res) => {
   } catch (error) {
     console.log("Error in deleteNotifications controller:", error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const createNotification = async ({ from, to, type, post }) => {
+  try {
+    const existingNotification = await Notification.findOne({
+      from,
+      to,
+      type,
+      post: post || null,
+    });
+
+    if (!existingNotification) {
+      const notification = new Notification({
+        from,
+        to,
+        type,
+        post: post || null,
+      });
+      await notification.save();
+    }
+  } catch (error) {
+    console.error("Error creating notification:", error);
   }
 };

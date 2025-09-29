@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
-import HomePage from "./pages/home/HomePage";
+import HomePage from "./pages/Home/HomePage";
 import LoginPage from "./pages/auth/login/LogInPage";
 import SignUpPage from "./pages/auth/signup/SignUpPage";
 import NotificationPage from "./pages/notification/NotificationPage";
@@ -19,7 +19,7 @@ function App() {
 		queryKey: ["authUser"],
 		queryFn: async () => {
 			try {
-				const res = await fetch("/api/auth/me");
+				const res = await fetch("/api/auth/me", { credentials: 'include' });
 				const data = await res.json();
 				if (data.error) return null;
 				if (!res.ok) {
@@ -47,11 +47,11 @@ function App() {
 			{/* Common component, bc it's not wrapped with Routes */}
 			{authUser && <Sidebar authUser={authUser} />}
 			<Routes>
-				<Route path='/' element={authUser ? <HomePage /> : <Navigate to='/login' />} />
+				<Route path='/' element={authUser ? <HomePage authUser={authUser} /> : <Navigate to='/login' />} />
 				<Route path='/login' element={!authUser ? <LoginPage /> : <Navigate to='/' />} />
 				<Route path='/signup' element={!authUser ? <SignUpPage /> : <Navigate to='/' />} />
 				<Route path='/notifications' element={authUser ? <NotificationPage /> : <Navigate to='/login' />} />
-				<Route path='/profile/:username' element={authUser ? <ProfilePage /> : <Navigate to='/login' />} />
+				<Route path='/profile/:username' element={authUser ? <ProfilePage authUser={authUser} /> : <Navigate to='/login' />} />
 			</Routes>
 			{authUser && <RightPanel />}
 			<Toaster />

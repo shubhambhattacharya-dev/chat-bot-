@@ -1,36 +1,53 @@
 import { Link } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
+
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 import { IoSettingsOutline } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
-import { FaHeart } from "react-icons/fa6";
+import { FaHeart, FaRegComment, FaRegBookmark } from "react-icons/fa6";
+import { FaExclamationTriangle } from "react-icons/fa";
+import { BiRepost } from "react-icons/bi";
 
 const NotificationPage = () => {
-	const isLoading = false;
-	const notifications = [
-		{
-			_id: "1",
-			from: {
-				_id: "1",
-				username: "johndoe",
-				profileImg: "/avatars/boy2.png",
-			},
-			type: "follow",
+	const queryClient = useQueryClient();
+	const { data, isLoading } = useQuery({
+		queryKey: ["notifications"],
+		queryFn: async () => {
+			try {
+				const res = await fetch("/api/notifications");
+				const data = await res.json();
+				if (!res.ok) throw new Error(data.error || "Something went wrong");
+				return data;
+			} catch (error) {
+				throw new Error(error);
+			}
 		},
-		{
-			_id: "2",
-			from: {
-				_id: "2",
-				username: "janedoe",
-				profileImg: "/avatars/girl1.png",
-			},
-			type: "like",
-		},
-	];
+	});
 
-	const deleteNotifications = () => {
-		alert("All notifications deleted");
-	};
+	const { mutate: deleteNotifications } = useMutation({
+		mutationFn: async () => {
+			try {
+				const res = await fetch("/api/notifications", {
+					method: "DELETE",
+				});
+				const data = await res.json();
+
+				if (!res.ok) throw new Error(data.error || "Something went wrong");
+				return data;
+			} catch (error) {
+				throw new Error(error);
+			}
+		},
+		onSuccess: () => {
+			toast.success("Notifications deleted successfully");
+			queryClient.invalidateQueries({ queryKey: ["notifications"] });
+		},
+		onError: (error) => {
+			toast.error(error.message);
+		},
+	});
 
 	return (
 		<>
@@ -56,26 +73,44 @@ const NotificationPage = () => {
 						<LoadingSpinner size='lg' />
 					</div>
 				)}
-				{notifications?.length === 0 && <div className='text-center p-4 font-bold'>No notifications 🤔</div>}
-				{notifications?.map((notification) => (
-					<div className='border-b border-gray-700' key={notification._id}>
-						<div className='flex gap-2 p-4'>
-							{notification.type === "follow" && <FaUser className='w-7 h-7 text-primary' />}
-							{notification.type === "like" && <FaHeart className='w-7 h-7 text-red-500' />}
-							<Link to={`/profile/${notification.from.username}`}>
-								<div className='avatar'>
-									<div className='w-8 rounded-full'>
-										<img src={notification.from.profileImg || "/avatar-placeholder.png"} />
-									</div>
-								</div>
-								<div className='flex gap-1'>
-									<span className='font-bold'>@{notification.from.username}</span>{" "}
-									{notification.type === "follow" ? "followed you" : "liked your post"}
-								</div>
-							</Link>
-						</div>
+				{data?.notifications?.length === 0 && <div className='text-center p-4 font-bold'>No notifications 🤔</div>}
+{data?.notifications?.map((notification) => (
+	<div className='border-b border-gray-700' key={notification._id}>
+		<div className='flex gap-2 p-4'>
+			{notification.type === "follow" && <FaUser className='w-7 h-7 text-primary' />}
+			{notification.type === "like" && <FaHeart className='w-7 h-7 text-red-500' />}
+			{notification.type === "comment" && <FaRegComment className='w-7 h-7 text-blue-500' />}
+			{notification.type === "repost" && <BiRepost className='w-7 h-7 text-green-500' />}
+			{notification.type === "bookmark" && <FaRegBookmark className='w-7 h-7 text-yellow-500' />}
+			{notification.type === "report" && <FaExclamationTriangle className='w-7 h-7 text-red-700' />}
+			<Link to={`/profile/${notification.from.username}`}>
+				<div className='avatar'>
+					<div className='w-8 rounded-full'>
+						<img src={notification.from.profileImg || "/avatar-placeholder.png"} />
 					</div>
-				))}
+				</div>
+				<div className='flex gap-1'>
+					<span className='font-bold'>@{notification.from.username}</span>{" "}
+					{notification.type === "follow" && "followed you"}
+					{notification.type === "like" && "liked your post"}
+					{notification.type === "comment" && "commented on your post"}
+					{notification.type === "repost" && "reposted your post"}
+					{notification.type === "bookmark" && "bookmarked your post"}
+					{notification.type === "report" && "reported your post"}
+				</div>
+			</Link>
+			{(notification.type !== "follow") && notification.post && (
+				<div className='ml-4'>
+					{notification.post.img ? (
+						<img src={notification.post.img} alt="Post image" className="w-16 h-16 object-cover rounded" />
+					) : (
+						<span className="text-sm italic">{notification.post.text?.slice(0, 30)}...</span>
+					)}
+				</div>
+			)}
+		</div>
+	</div>
+))}
 			</div>
 		</>
 	);

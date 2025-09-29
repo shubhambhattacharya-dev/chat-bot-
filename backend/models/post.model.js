@@ -26,8 +26,16 @@ const postSchema = new mongoose.Schema({
       ref: "User",
       required: true
     }
+  }],
+  reposts: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+  }],
+  bookmarks: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
   }]
 }, { timestamps: true });
 
-const Post = mongoose.model("post", postSchema);
+const Post = mongoose.model("Post", postSchema);
 export default Post;

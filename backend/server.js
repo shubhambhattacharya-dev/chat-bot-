@@ -8,6 +8,7 @@ import authRoutes from './routes/auth.route.js';
 import userRoutes from './routes/user.route.js';
 import postRoutes from './routes/post.route.js'; 
 import notificationRoutes from './routes/notification.route.js';
+import Post from './models/post.model.js';  // Import Post model to register it with Mongoose
 
 dotenv.config();
 
@@ -19,7 +20,7 @@ cloudinary.config({
 
 const app = express();
 
-app.use(express.json());
+app.use(express.json({limit: '5mb'}));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
@@ -28,7 +29,7 @@ const port = process.env.PORT || 5000;
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
-app.use('/api/notification',notificationRoutes);
+app.use('/api/notifications',notificationRoutes);
 
 (async () => {
     try {

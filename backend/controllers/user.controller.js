@@ -176,3 +176,29 @@ export const updateUser = async (req, res) => {
     return res.status(500).json({ error: error.message }); 
   }
 };
+
+export const getFollowers = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await User.findOne({ username }).populate("followers", "-password");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    return res.status(200).json(user.followers);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+export const getFollowing = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await User.findOne({ username }).populate("following", "-password");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    return res.status(200).json(user.following);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};

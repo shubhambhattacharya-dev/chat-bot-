@@ -1,0 +1,5 @@
+- [x] Add getFollowers and getFollowing functions in user.controller.js
+- [x] Add routes for /followers/:username and /following/:username in user.route.js
+- [x] Create UserList.jsx component for displaying user lists
+- [x] Modify ProfilePage.jsx: add "followers" and "following" feed types, make counts clickable, add tabs
+- [x] Update ProfilePage.jsx to conditionally render UserList or Posts based on feedType

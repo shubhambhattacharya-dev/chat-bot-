@@ -9,6 +9,7 @@ const useFollow = () => {
 			try {
 				const res = await fetch(`/api/users/follow/${userId}`, {
 					method: "POST",
+					credentials: 'include',
 				});
 
 				const data = await res.json();
@@ -24,6 +25,8 @@ const useFollow = () => {
 			Promise.all([
 				queryClient.invalidateQueries({ queryKey: ["suggestedUsers"] }),
 				queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+				queryClient.invalidateQueries({ queryKey: ["userProfile"] }),
+				queryClient.invalidateQueries({ queryKey: ["userList"] }),
 			]);
 		},
 		onError: (error) => {
